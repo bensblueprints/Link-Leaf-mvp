@@ -1,12 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Link2, User, Blocks, Palette, BarChart3, Mail, LogOut, ExternalLink, Lock } from 'lucide-react';
+import { Link2, User, Blocks, Palette, BarChart3, Mail, LogOut, ExternalLink, Lock, Code2 } from 'lucide-react';
 import { api, BASE } from './api';
 import ProfileTab from './components/ProfileTab.jsx';
 import BlocksTab from './components/BlocksTab.jsx';
 import ThemeTab from './components/ThemeTab.jsx';
 import AnalyticsTab from './components/AnalyticsTab.jsx';
 import SubscribersTab from './components/SubscribersTab.jsx';
+import EmbedTab from './components/EmbedTab.jsx';
 import { Button } from './components/ui.jsx';
 
 const TABS = [
@@ -14,7 +15,8 @@ const TABS = [
   { id: 'blocks', label: 'Blocks', icon: Blocks },
   { id: 'theme', label: 'Theme', icon: Palette },
   { id: 'analytics', label: 'Analytics', icon: BarChart3 },
-  { id: 'subscribers', label: 'Subscribers', icon: Mail }
+  { id: 'subscribers', label: 'Subscribers', icon: Mail },
+  { id: 'embed', label: 'Embed', icon: Code2 }
 ];
 
 function Login({ onDone }) {
@@ -138,6 +140,7 @@ export default function App() {
           {tab === 'theme' && <ThemeTab />}
           {tab === 'analytics' && <AnalyticsTab />}
           {tab === 'subscribers' && <SubscribersTab />}
+          {tab === 'embed' && <EmbedTab />}
         </motion.div>
       </AnimatePresence>
     </div>

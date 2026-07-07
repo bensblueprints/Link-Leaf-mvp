@@ -209,6 +209,16 @@ async function subscribe(e, blockId){
   } catch { msg.textContent = 'Network error — try again'; }
   return false;
 }
+// Report height to an embedding parent frame so the embed script can auto-size the iframe.
+if (window.parent !== window) {
+  var lastH = 0;
+  function reportHeight() {
+    var h = document.documentElement.scrollHeight;
+    if (h !== lastH) { lastH = h; window.parent.postMessage({ source: 'link-in-bio', height: h }, '*'); }
+  }
+  new ResizeObserver(reportHeight).observe(document.body);
+  reportHeight();
+}
 </script>
 </body>
 </html>`;
