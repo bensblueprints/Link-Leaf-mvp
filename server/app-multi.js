@@ -9,6 +9,7 @@ const gating = require('./gating');
 const blockCatalog = require('./block-catalog');
 const whop = require('./whop');
 const admin = require('./admin');
+const social = require('./social');
 const { renderPublicPage, FONTS, THEMES, SOCIALS, isBlockLive } = require('./public-page');
 
 function createMultiApp(opts = {}) {
@@ -183,6 +184,8 @@ function createMultiApp(opts = {}) {
   dash.put('/settings', async (req, res) => {
     const patch = { ...req.body };
     const cfg = gating.planConfig(req.user.plan);
+    // Turn any social handles typed in the profile ("@ben") into full URLs.
+    if (patch.socials && typeof patch.socials === 'object') patch.socials = social.normalizeSocials(patch.socials);
     if (patch.theme && !gating.canUseTheme(req.user.plan, patch.theme)) delete patch.theme;
     if (!cfg.customStyling) {
       delete patch.custom_css;

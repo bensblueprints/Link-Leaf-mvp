@@ -57,18 +57,31 @@ async function signupAndOnboard(base, jarName, username) {
     const bob = await signupAndOnboard(base, 'bob', 'bob-smoke');
     ok('two independent signups completed onboarding');
 
-    // --- isolation: alice's dashboard data must not include bob's blocks ---
-    let r = await fetch(base + '/api/blocks', { headers: { cookie: alice.cookie } });
+    // --- onboarding routes social platforms to the icon row (not link blocks) ---
+    let r = await fetch(base + '/api/settings', { headers: { cookie: alice.cookie } });
+    const aliceSettings = await r.json();
+    assert(String(aliceSettings.socials.website || '').includes('alice-smoke'), 'onboarding website entry became a social link');
+    r = await fetch(base + '/api/blocks', { headers: { cookie: alice.cookie } });
     const aliceBlocks = await r.json();
-    assert.strictEqual(aliceBlocks.length, 1);
-    assert(aliceBlocks[0].url.includes('alice-smoke'));
-    ok('tenant isolation: alice only sees her own blocks');
+    assert.strictEqual(aliceBlocks.length, 0, 'social platforms go to the icon row, not link blocks');
+    ok('onboarding socials land in the icon row; tenant isolation holds');
+
+    // --- a bare handle typed in the profile is normalized to a full URL ---
+    r = await fetch(base + '/api/settings', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json', cookie: alice.cookie },
+      body: JSON.stringify({ socials: { instagram: '@alice_handle' } })
+    });
+    const normd = await r.json();
+    assert.strictEqual(normd.socials.instagram, 'https://instagram.com/alice_handle', 'bare @handle became a full instagram URL');
+    ok('social handles auto-convert to navigable URLs');
 
     // --- public pages render independently ---
     r = await fetch(base + '/alice-smoke');
     let html = await r.text();
     assert(html.includes('alice'), 'alice page shows her display name');
     assert(html.includes('class="theme-dark"'), 'alice page uses her chosen theme');
+    assert(html.includes('instagram.com/alice_handle'), 'alice page shows her social icon link');
 
     r = await fetch(base + '/bob-smoke');
     html = await r.text();

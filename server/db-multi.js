@@ -3,6 +3,7 @@
 // read/write is scoped by page_id/user_id so tenants can never see each other's data.
 const { Pool } = require('pg');
 const crypto = require('crypto');
+const social = require('./social');
 
 let pool;
 function getPool() {
@@ -162,7 +163,7 @@ async function findPageByUsername(username) {
 
 const PAGE_FIELDS = [
   'display_name', 'bio', 'avatar', 'socials', 'theme', 'accent',
-  'bg_type', 'bg_value', 'font', 'custom_css', 'seo_title', 'seo_description'
+  'bg_type', 'bg_value', 'font', 'custom_css', 'seo_title', 'seo_description', 'layout'
 ];
 
 async function updatePage(pageId, patch) {
@@ -193,19 +194,33 @@ async function completeOnboarding({ userId, username, plan, theme, profile, link
     if (plan && plan !== 'free') {
       await client.query('UPDATE users SET plan = $2 WHERE id = $1', [userId, plan]);
     }
+
+    // Each onboarding platform entry is a social. Turn the handle they typed
+    // (e.g. "@ben") into a full URL and store it in the socials icon row so it
+    // shows the platform icon AND is actually navigable. Anything on a platform
+    // we don't have an icon for falls back to a plain link block.
+    const socials = {};
+    const linkBlocks = [];
+    for (const link of links || []) {
+      if (!link.value) continue;
+      const url = social.socialUrl(link.platform, link.value);
+      if (!url) continue;
+      if (social.SOCIAL_PLATFORMS.has(link.platform)) socials[link.platform] = url;
+      else linkBlocks.push({ platform: link.platform, url });
+    }
+
     const { rows: pageRows } = await client.query(
-      `INSERT INTO pages (user_id, username, display_name, bio, avatar, theme)
-       VALUES ($1, $2, $3, $4, $5, $6) RETURNING *`,
-      [userId, username, profile.display_name || '', profile.bio || '', profile.avatar || '', theme || 'gradient']
+      `INSERT INTO pages (user_id, username, display_name, bio, avatar, theme, socials)
+       VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *`,
+      [userId, username, profile.display_name || '', profile.bio || '', profile.avatar || '', theme || 'gradient', JSON.stringify(socials)]
     );
     const page = pageRows[0];
 
     let position = 0;
-    for (const link of links) {
-      if (!link.value) continue;
+    for (const b of linkBlocks) {
       await client.query(
         `INSERT INTO blocks (page_id, type, title, url, position) VALUES ($1, 'link', $2, $3, $4)`,
-        [page.id, link.platform, link.value, position++]
+        [page.id, b.platform, b.url, position++]
       );
     }
     await client.query('COMMIT');

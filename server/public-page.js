@@ -21,6 +21,7 @@ const SOCIALS = {
   tiktok: { label: 'TikTok', svg: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 12a4 4 0 1 0 4 4V4c.5 2.5 2.5 4.5 5 5"/></svg>` },
   youtube: { label: 'YouTube', svg: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22.54 6.42a2.78 2.78 0 0 0-1.94-2C18.88 4 12 4 12 4s-6.88 0-8.6.46a2.78 2.78 0 0 0-1.94 2A29 29 0 0 0 1 11.75a29 29 0 0 0 .46 5.33A2.78 2.78 0 0 0 3.4 19c1.72.46 8.6.46 8.6.46s6.88 0 8.6-.46a2.78 2.78 0 0 0 1.94-2 29 29 0 0 0 .46-5.25 29 29 0 0 0-.46-5.33z"/><polygon points="9.75 15.02 15.5 11.75 9.75 8.48 9.75 15.02"/></svg>` },
   facebook: { label: 'Facebook', svg: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg>` },
+  whatsapp: { label: 'WhatsApp', svg: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>` },
   linkedin: { label: 'LinkedIn', svg: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4V9h4v1.5"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg>` },
   github: { label: 'GitHub', svg: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/></svg>` },
   twitch: { label: 'Twitch', svg: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 2H3v16h5v4l4-4h5l4-4V2zM11 11V7M16 11V7"/></svg>` },
@@ -85,6 +86,15 @@ h1 { margin-top:16px; font-size:1.45rem; letter-spacing:-.01em; }
 .block-link .thumb + span { margin-right:44px; } /* keep title optically centered */
 .block-link.animate:hover { transform:scale(1.03) translateY(-2px); }
 .block-link:hover { transform:translateY(-2px); }
+
+/* Grid layout — link cards become 2-up tiles that lead with their thumbnail.
+   Non-link blocks (embeds, forms, FAQs, etc.) always span the full width. */
+.blocks-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:12px; }
+.blocks-grid > :not(.block-link) { grid-column:1 / -1; }
+.blocks-grid .block-link { flex-direction:column; align-items:stretch; gap:10px; padding:12px; text-align:center; }
+.blocks-grid .block-link .thumb { width:100%; height:auto; aspect-ratio:1 / 1; border-radius:10px; }
+.blocks-grid .block-link span { flex:none; margin-right:0 !important; }
+.blocks-grid .block-link .thumb + span { margin-right:0; }
 .block-header { margin-top:10px; text-align:center; font-size:.85rem; font-weight:700; text-transform:uppercase; letter-spacing:.14em; opacity:.65; }
 .block-header::after { content:''; display:block; margin:10px auto 0; width:48px; height:2px; background:var(--accent); border-radius:2px; opacity:.7; }
 .block-video { border-radius:14px; overflow:hidden; aspect-ratio:16/9; box-shadow:0 8px 32px rgba(0,0,0,.25); }
@@ -299,7 +309,7 @@ ${s.custom_css ? `<style>\n${s.custom_css}\n</style>` : ''}
   <h1>${esc(s.display_name)}</h1>
   ${s.bio ? `<p class="bio">${esc(s.bio)}</p>` : ''}
   ${socialRow ? `<div class="socials">${socialRow}</div>` : ''}
-  <div class="blocks">
+  <div class="blocks${s.layout === 'grid' ? ' blocks-grid' : ''}">
     ${live.map((b) => renderBlock(b, basePath)).join('\n    ')}
   </div>
 </main>

@@ -37,8 +37,54 @@ export default function ThemeTab() {
     setTimeout(() => setSaved(false), 2000);
   }
 
+  const layout = s.layout === 'grid' ? 'grid' : 'list';
+
   return (
     <div className="space-y-4">
+      <Card title="Layout">
+        <p className="text-xs text-zinc-500 mb-3 -mt-2">
+          List stacks your blocks full-width. Grid shows links as 2-up tiles that lead with their uploaded thumbnail.
+        </p>
+        <div className="grid grid-cols-2 gap-3 max-w-sm">
+          {[
+            { key: 'list', label: 'List', hint: 'Stacked cards' },
+            { key: 'grid', label: 'Grid', hint: 'Thumbnail tiles' }
+          ].map((opt) => (
+            <button
+              key={opt.key}
+              onClick={() => set('layout', opt.key)}
+              className={`rounded-xl border-2 p-3 text-left transition-all cursor-pointer ${
+                layout === opt.key ? 'border-orange-500 ring-2 ring-orange-500/30' : 'border-zinc-800 hover:border-zinc-600'
+              }`}
+            >
+              <div className={`flex gap-1.5 mb-2 ${opt.key === 'grid' ? 'flex-row flex-wrap' : 'flex-col'}`}>
+                {opt.key === 'list' ? (
+                  <>
+                    <div className="h-2.5 w-full rounded bg-zinc-600" />
+                    <div className="h-2.5 w-full rounded bg-zinc-600" />
+                    <div className="h-2.5 w-full rounded bg-zinc-600" />
+                  </>
+                ) : (
+                  <>
+                    <div className="h-6 w-[calc(50%-3px)] rounded bg-zinc-600" />
+                    <div className="h-6 w-[calc(50%-3px)] rounded bg-zinc-600" />
+                    <div className="h-6 w-[calc(50%-3px)] rounded bg-zinc-600" />
+                    <div className="h-6 w-[calc(50%-3px)] rounded bg-zinc-600" />
+                  </>
+                )}
+              </div>
+              <div className="text-sm font-semibold flex items-center gap-1.5">
+                {opt.label} {layout === opt.key && <Check size={13} className="text-orange-400" />}
+              </div>
+              <div className="text-[11px] text-zinc-500">{opt.hint}</div>
+            </button>
+          ))}
+        </div>
+        <p className="text-xs text-zinc-500 mt-3">
+          Tip: in grid mode, add a thumbnail to each link (in the Blocks tab) so the tiles look their best.
+        </p>
+      </Card>
+
       <Card title="Theme preset">
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
           {meta.themes.map((t) => {
@@ -143,7 +189,7 @@ export default function ThemeTab() {
             <Check size={14} /> Saved
           </span>
         )}
-        <a href="/" target="_blank" rel="noreferrer" className="text-sm text-zinc-400 hover:text-white underline underline-offset-4">
+        <a href={s.username ? `/${s.username}` : '/'} target="_blank" rel="noreferrer" className="text-sm text-zinc-400 hover:text-white underline underline-offset-4">
           Preview public page →
         </a>
       </div>
