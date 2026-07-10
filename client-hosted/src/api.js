@@ -1,12 +1,30 @@
 export const BASE = '';
 
+// Every request gets a hard timeout so a stalled connection (bad wifi, an ad
+// blocker eating the request, a flaky proxy) fails with a visible error
+// instead of leaving the caller's loading state spinning forever.
+const REQUEST_TIMEOUT_MS = 20000;
+
 async function req(method, url, body) {
   const opts = { method, headers: {}, credentials: 'same-origin' };
   if (body !== undefined) {
     opts.headers['Content-Type'] = 'application/json';
     opts.body = JSON.stringify(body);
   }
-  const r = await fetch(BASE + url, opts);
+  const controller = new AbortController();
+  opts.signal = controller.signal;
+  const timer = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
+  let r;
+  try {
+    r = await fetch(BASE + url, opts);
+  } catch (e) {
+    if (e.name === 'AbortError') {
+      throw new Error('That took too long to respond. Check your connection and try again.');
+    }
+    throw new Error('Network error — check your connection and try again.');
+  } finally {
+    clearTimeout(timer);
+  }
   if (r.status === 401) throw Object.assign(new Error('Unauthorized'), { unauthorized: true });
   const j = await r.json().catch(() => ({}));
   if (!r.ok) throw new Error(j.error || `Request failed (${r.status})`);
@@ -30,7 +48,17 @@ export const api = {
   upload: async (file) => {
     const fd = new FormData();
     fd.append('file', file);
-    const r = await fetch(BASE + '/api/upload', { method: 'POST', body: fd, credentials: 'same-origin' });
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 60000); // uploads get more time than JSON calls
+    let r;
+    try {
+      r = await fetch(BASE + '/api/upload', { method: 'POST', body: fd, credentials: 'same-origin', signal: controller.signal });
+    } catch (e) {
+      if (e.name === 'AbortError') throw new Error('Upload took too long. Check your connection and try again.');
+      throw new Error('Network error — check your connection and try again.');
+    } finally {
+      clearTimeout(timer);
+    }
     const j = await r.json().catch(() => ({}));
     if (!r.ok) throw new Error(j.error || 'Upload failed');
     return j;
