@@ -66,6 +66,11 @@ const ICON_LINK_LABELS = {
   maps: '📍 Get Directions'
 };
 
+// Block types rendered as plain clickable-card link redirects (vs. embeds,
+// forms, etc). Shared with app-multi.js so the /r/:id redirect handler
+// allows exactly the same set of types this renderer treats as link cards.
+const LINK_STYLE_TYPES = new Set(['link', 'maps', 'gofundme', 'discord', 'whatsapp', 'tour_events', 'instagram', 'tiktok']);
+
 const THEME_CSS = `
 :root { --accent: #8b5cf6; }
 * { margin:0; padding:0; box-sizing:border-box; }
@@ -341,4 +346,4 @@ if (window.parent !== window) {
 </html>`;
 }
 
-module.exports = { renderPublicPage, FONTS, THEMES, SOCIALS, isBlockLive };
+module.exports = { renderPublicPage, FONTS, THEMES, SOCIALS, isBlockLive, LINK_STYLE_TYPES };

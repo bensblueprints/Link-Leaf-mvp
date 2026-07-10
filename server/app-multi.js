@@ -10,7 +10,7 @@ const blockCatalog = require('./block-catalog');
 const whop = require('./whop');
 const admin = require('./admin');
 const social = require('./social');
-const { renderPublicPage, FONTS, THEMES, SOCIALS, isBlockLive } = require('./public-page');
+const { renderPublicPage, FONTS, THEMES, SOCIALS, isBlockLive, LINK_STYLE_TYPES } = require('./public-page');
 
 function createMultiApp(opts = {}) {
   const dataDir = opts.dataDir || process.env.DATA_DIR || path.join(__dirname, '..', 'data');
@@ -290,7 +290,7 @@ function createMultiApp(opts = {}) {
   // ================= PUBLIC =================
   app.get('/r/:id', async (req, res) => {
     const block = await db.findBlockById(req.params.id);
-    if (!block || block.type !== 'link' || !block.url || !isBlockLive(block)) return res.redirect('/');
+    if (!block || !LINK_STYLE_TYPES.has(block.type) || !block.url || !isBlockLive(block)) return res.redirect('/');
     await db.recordClick(block.id);
     res.redirect(block.url);
   });
