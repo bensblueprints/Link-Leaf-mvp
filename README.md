@@ -6,6 +6,8 @@
 
 **A beautiful link-in-bio builder. Use the free hosted version in seconds — or self-host the open-source code yourself. No branding lock-in, your subscriber data is always yours.**
 
+**Buy the packaged app (installer + lifetime updates): https://whop.com/benjisaiempire/linkleaf** — or grab the whole 101-app suite: https://whop.com/benjisaiempire/onetimesuite-complete
+
 [![License: MIT](https://img.shields.io/badge/License-MIT-22c55e.svg)](LICENSE)
 [![Hosted](https://img.shields.io/badge/hosted-linkleaf.im-f97316)](https://linkleaf.im)
 [![Self-host](https://img.shields.io/badge/self--host-Docker%20ready-2496ED?logo=docker&logoColor=white)](#-self-host-it-developers)
