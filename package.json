@@ -13,6 +13,7 @@
     "postinstall": "node scripts/setup-native.js",
     "desktop": "electron .",
     "test": "node test/smoke.js",
+    "activate": "node scripts/whop-activate.js",
     "test:multi": "node test/smoke-multi.js",
     "db:migrate": "node scripts/migrate-pg.js",
     "dist": "electron-builder --win nsis"
